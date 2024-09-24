@@ -5,6 +5,7 @@ namespace App\Domains\Database\Application;
 use App\Domains\Database\Infrastructure\DatabaseRespository;
 use Illuminate\Support\Facades\File; 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 
 class DatabaseService
@@ -16,9 +17,31 @@ class DatabaseService
         $this->DatabaseRepository = $DatabaseRepository;
     }
 
-    public function createDatabase(Request $database)
+    public function createDatabase(Request $request)
     {
-        return $this->DatabaseRepository->createDatabase($database);
+        
+        $file = $request->file('csvfile');
+
+        $fileContents = file($file->getPathname());
+
+
+
+        $columnNames = [];
+        $lines = [];
+
+        
+        foreach ($fileContents as $key => $value) {
+            
+            $data = str_getcsv($value);
+
+            if($key == 0){
+                $columnNames = $data;
+            }else{
+                array_push($lines, $data);
+            }
+        }
+
+        return $this->DatabaseRepository->createDatabase($columnNames, $lines);
     }
 
     public function getAllDatabases()
@@ -26,20 +49,5 @@ class DatabaseService
         return $this->DatabaseRepository->getAllDatabases();
     }
 
-    public function getDatabase(string $id)
-    {
-        return $this->DatabaseRepository->getDatabase($id);
-    }
 
-
-    public function deleteDatabase(string $id)
-    {   
-        $database = $this->getDatabase($id);
-
-        if($database){
-            Storage::delete('/public/'.$database->file);
-            return $this->DatabaseRepository->deleteDatabase($id);
-        }
-
-    }
 }

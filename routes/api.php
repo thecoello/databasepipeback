@@ -17,8 +17,6 @@ Route::post('/login', [LoginController::class, 'login']);
 
 Route::post('/pipereport', [DatabaseController::class, 'createDatabase']);
 Route::get('/pipereports', [DatabaseController::class, 'getAllDatabases']);
-Route::get('/pipereport/{id}', [DatabaseController::class, 'getDatabase']);
-Route::delete('/pipereport/{id}', [DatabaseController::class, 'deleteDatabase']);
 
 Route::middleware(['auth:sanctum', AuthenticateUserId::class])->group(function () {
   Route::get('/users', [UserController::class, 'getAllUsers'])->middleware(AdminMiddleware::class); 

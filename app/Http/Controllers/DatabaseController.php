@@ -23,13 +23,4 @@ class DatabaseController extends Controller
         return $this->DatabaseService->getAllDatabases();
     }
 
-    public function getDatabase(string $id){
-        return $this->DatabaseService->getDatabase($id);  
-    }
-
-
-    public function deleteDatabase(string $id){
-        return $this->DatabaseService->deleteDatabase($id);
-    }
-
 }
