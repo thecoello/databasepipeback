@@ -32,7 +32,13 @@ class DatabaseService
         
         foreach ($fileContents as $key => $value) {
             
-            $data = str_getcsv($value);
+            $data = [];
+
+            if(count(str_getcsv($fileContents[0],',')) > count(str_getcsv($fileContents[0],';'))){
+                $data = str_getcsv($value,',');
+            }else{
+                $data = str_getcsv($value,';');
+            }
 
             if($key == 0){
                 $columnNames = $data;

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class Database extends Model  {
 
@@ -26,19 +27,6 @@ class Database extends Model  {
      *
      * @var array
      */
-
-     protected $fillable = ['customername','country','saletype','file','points','user_id'];
-
-
-    protected $casts = [
-        'id',
-        'customername' => 'encrypted',
-        'country' => 'encrypted',
-        'saletype' => 'encrypted',
-        'file' => 'encrypted',
-        'points' => 'encrypted',
-        'user_id'
-    ];
 
     /**
      * The primary key associated with the table.
