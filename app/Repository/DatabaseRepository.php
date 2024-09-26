@@ -45,7 +45,6 @@ class DatabaseRespository
             });
         }
 
-
         foreach ($lines as $key => $line) {
 
             foreach ($line as $key => $cell) {
@@ -62,32 +61,17 @@ class DatabaseRespository
 
     public function getAllDatabases()
     {
-        $columnNames = Schema::getColumnListing('pipereport');
-       
-
-
-       $table = DB::table('pipereport')->select()->get()->transform(function($data) use ($columnNames){
+        $table = DB::table('pipereport')->select()->get()->transform(function ($data, int $key) {
             
-            
-            foreach ($columnNames as $key => $value) {
-
-                try {
-
-                  if($value === 'id'){
-                    $col[$value] = $data->$value;
-                  }
-
-                  $col[$value] = Crypt::decryptString($data->$value);
-                  $newData = $col;
+            foreach ((array) $data as $key => $value) {
+                try {              
+                    $data->$key = mb_convert_encoding(Crypt::decryptString($value), 'UTF-8') ;
                 } catch (DecryptException $e) {
                 }
             }
+            return $data;
+        });
 
-            return $newData;
-
-         });
-
-         return response(json_decode($table), 200);
-                
+        return response()->json($table);
     }
 }
