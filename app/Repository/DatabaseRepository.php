@@ -34,44 +34,57 @@ class DatabaseRespository
             $table->increments('id');
         });
 
-        foreach ($columnNames as $key => $value) {
+        if (count((array) $columnNames) > 0) {
 
-            $valueClean = (string) preg_replace('/\s+/', '_', str_replace(array('\'', '"', '.', ',', ',', ';', '<', '>'), ' ', $value));
+            foreach ($columnNames as $key => $value) {
 
-            array_push($newColumns, $valueClean);
+                $valueClean = (string) preg_replace('/\s+/', '_', str_replace(array('\'', '"', '.', ',', ',', ';', '<', '>'), ' ', $value));
 
-            Schema::table('pipereport', function ($table) use ($valueClean) {
-                $table->longtext($valueClean)->nullable();
-            });
-        }
+                array_push($newColumns, $valueClean);
 
-        foreach ($lines as $key => $line) {
-
-            foreach ($line as $key => $cell) {
-                $dataArr = [];
-                $arr[$newColumns[$key]] = Crypt::encryptString((string)$cell);
-                array_push($dataArr, $arr);
+                Schema::table('pipereport', function ($table) use ($valueClean) {
+                    $table->longtext($valueClean)->nullable();
+                });
             }
-
-            DB::table('pipereport')->insert($dataArr);
         }
 
-        return response('csv uploaded', 200);
+        if (count((array) $lines) > 0) {
+            foreach ($lines as $key => $line) {
+
+                if (count((array) $line) > 0) {
+
+                    foreach ($line as $key => $cell) {
+                        $dataArr = [];
+                        $arr[$newColumns[$key]] = Crypt::encryptString((string)$cell);
+                        array_push($dataArr, $arr);
+                    }
+
+                    DB::table('pipereport')->insert($dataArr);
+                }
+            }
+        }
+
+        return response()->json('csv uploaded')->status(200);
     }
 
     public function getAllDatabases()
     {
         $table = DB::table('pipereport')->select()->get()->transform(function ($data, int $key) {
-            
-            foreach ((array) $data as $key => $value) {
-                try {              
-                    $data->$key = mb_convert_encoding(Crypt::decryptString($value), 'UTF-8') ;
-                } catch (DecryptException $e) {
+
+            if (count((array) $data) > 0) {
+                foreach ((array) $data as $key => $value) {
+                    try {
+                        $data->$key = mb_convert_encoding(Crypt::decryptString($value), 'UTF-8');
+                    } catch (DecryptException $e) {
+                    }
                 }
             }
+
             return $data;
         });
 
-        return response()->json($table);
+        if (count($table) > 0) {
+            return response()->json($table);
+        }
     }
 }
