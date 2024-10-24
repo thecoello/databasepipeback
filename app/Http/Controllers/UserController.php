@@ -25,13 +25,14 @@ class UserController extends Controller
         return $this->userService->getAllUsers();
     }
 
-    public function getAllAdminUsers()
+    public function getUser(string $id)
     {
-        return $this->userService->getAllAdminUsers();
+        return $this->userService->getUser($id);
     }
 
-    public function getUser(string $id){
-        return $this->userService->getUser($id);  
+    public function setNewPassword(string $id)
+    {
+        return $this->userService->setNewPassword($id);
     }
 
     public function updateUser(string $id, Request $request){
@@ -42,16 +43,9 @@ class UserController extends Controller
         return $this->userService->deleteUser($id);
     }
 
-    public function passwordRecover(Request $request){
-        return $this->userService->passwordRecover($request);
-    }
-
     public function consultToken(string $token){
         return $this->userService->consultToken($token);
     }
 
-    public function changePassword(Request $request){
-        return  $this->userService->changePassword($request);
-    }
 
 }

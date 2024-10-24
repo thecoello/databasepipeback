@@ -11,27 +11,27 @@ class UserRespository
 
     public function createUser(Request $request)
     {
-        return $this->getUser(User::create($request->all())->id);
+        return User::create($request->all());
     }
 
     public function getAllUsers()
     {
-        return User::where('usertype', '=', 'USER')->orderBy('id', 'desc')->paginate(10);
-    }
-
-    public function getAllAdminUsers()
-    {
-        return User::where('usertype', '=', 'ADMIN')->orderBy('id', 'desc')->paginate(10);
+        return User::paginate(10);
     }
 
     public function getUser(string $id)
     {
-        return User::find($id);
+        return User::where('id','=',$id)->first();
+    }
+
+    public function setNewPassword(string $id, $request)
+    {
+        return User::find($id)->update($request);
     }
 
     public function updateUser(string $id, Request $request)
     {
-        return $this->getUser(User::find($id)->update($request->all()));
+        return User::find($id)->update($request->all())->id;
     }
 
     public function deleteUser(string $id)
@@ -39,31 +39,9 @@ class UserRespository
         return User::find($id)->delete();
     }
 
-    public function passwordRecover(Request $request)
-    {
-        return User::where('email','=',$request->email)->first();
-    }
-
-    public function passwordCreateToken(Array $dataToken)
-    {   
-        DB::table('passresettokens')->where('user_id','=',$dataToken['user_id'])->delete();
-        $tokenID = DB::table('passresettokens')->insertGetId($dataToken);
-        return DB::table('passresettokens')->find($tokenID);
-    }
-
     public function consultToken(string $token){
         return DB::table('passresettokens')->where('token','=',$token)->first();
     }
 
-    public function changePassword(Request $request){
-        $token = $this->consultToken($request->token);
-        if($token){
-            DB::table('passresettokens')->where('user_id','=',$token->user_id)->delete();
-            DB::table('personal_access_tokens')->where('tokenable_id','=',$token->user_id)->delete();
-
-            return User::find($token->user_id)->update(["password" =>$request->password]);
-        }else{
-            return null;
-        }
-    }
+ 
 }

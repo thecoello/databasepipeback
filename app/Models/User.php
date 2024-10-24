@@ -33,15 +33,11 @@ class User extends Authenticatable  {
 
     protected $fillable = [
         'id',
-        'companyname',
         'name',
-        'country',
-        'region',
         'email',
         'password',
         'usertype'
     ];
-
 
     /**
      * The primary key associated with the table.

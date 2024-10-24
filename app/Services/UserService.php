@@ -11,6 +11,7 @@ use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use Nette\Schema\Message;
+use stdClass;
 
 class UserService
 {
@@ -23,12 +24,32 @@ class UserService
 
     public function createUser(Request $request)
     {
-        $validator = Validator::make($request->all(), ['email' => ['required', 'unique:users'], 'password' => [
-            Password::min(6)->numbers()->mixedCase()
+
+        $request['password'] = Str::password(12,true,true,false,false);
+
+
+        $validator = Validator::make($request->all(), ['email' => ['required', 'unique:users,email'], 'password' => [
+            Password::min(6)->numbers()->letters()
         ]]);
 
         if ($validator->passes()) {
-            return $this->userRepository->createUser($request);
+
+            $createUser = $this->userRepository->createUser($request);
+
+            $data = ['password' => $request->password, 'email' => $request->email];
+
+
+            if($createUser){
+                Mail::send('usercreation', $data, function ($message) use ($request) {
+                    $message->from('manu@tasman.es');
+                    $message->subject('Your credentials - S/4HANA Report Analysis');
+                    $message->to($request->email);
+                });
+    
+                return $createUser;
+            }
+
+           
         } else {
             return Response::json($validator->errors(), 403);
         }
@@ -39,14 +60,43 @@ class UserService
         return $this->userRepository->getAllUsers();
     }
 
-    public function getAllAdminUsers()
-    {
-        return $this->userRepository->getAllAdminUsers();
-    }
-
     public function getUser(string $id)
     {
-        return $this->userRepository->getUser($id);
+        return  $this->userRepository->getUser($id);
+    }
+
+    public function setNewPassword(string $id)
+    {
+        $findUser = $this->getUser($id)->toArray();
+
+        $findUser['password'] = Str::password(12,true,true,false,false);
+    
+        $validator = Validator::make($findUser, ['password' => [
+            Password::min(6)->numbers()->letters()
+        ]]);
+
+
+         if ($validator->passes()) {
+
+            $updatePassword = $this->getUser($this->userRepository->setNewPassword($id,$findUser));
+
+            $data = ['password' => $findUser['password'], 'email' => $updatePassword->email];
+
+            if($updatePassword){
+                Mail::send('setnewpassword', $data, function ($message) use ($findUser) {
+                    $message->from('manu@tasman.es');
+                    $message->subject('Your password has been updated - S/4HANA Report Analysis');
+                    $message->to($findUser['email']);
+                });
+    
+                return $updatePassword;
+            } 
+
+            
+        } else {
+            return Response::json($validator->errors(), 403);
+        } 
+            
     }
 
     public function updateUser(string $id, Request $request)
@@ -67,47 +117,10 @@ class UserService
         return $this->userRepository->deleteUser($id);
     }
 
-    public function passwordRecover(Request $request)
-    {
-
-        $validator = Validator::make($request->all(), ['email' => ['required']]);
-
-        if ($validator->passes()) {
-
-            $user = $this->userRepository->passwordRecover($request);
-
-            $userId = [
-                'user_id' => $user->id,
-                'token' => Str::random(60)
-            ];
-
-            $tokenCreated = $this->userRepository->passwordCreateToken($userId);
-            $data = ['token' => $tokenCreated->token];
-
-            Mail::send('passreset', $data, function ($message) use ($request) {
-                $message->from('support@bewatercompetition.com');
-                $message->subject('Reset Password - My Wave Competition');
-                $message->to($request->email);
-            });
-
-            return Response::json("Email Sent", 200);
-        } else {
-            return Response::json($validator->errors(), 403);
-        }
-    }
-
     public function consultToken(string $token)
     {
         return  $this->userRepository->consultToken($token);
     }
 
-    public function changePassword(Request $request)
-    {
-        $resetPassword =  $this->userRepository->changePassword($request);
-        if ($resetPassword) {
-            return $resetPassword;
-        } else {
-            return Response::json("Token not found", 404);
-        }
-    }
+
 }
