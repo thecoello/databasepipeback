@@ -25,8 +25,8 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "classmap": [
-            "app/repository/",
-            "app/services/"
+            "app/Repository/",
+            "app/Services/"
         ]
     },
     "autoload-dev": {

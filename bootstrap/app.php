@@ -14,11 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->validateCsrfTokens(except: [
             'user','user/*',
-            'contract','contract/*',
-            'point','point/*',
+            'users','users/*',
+            'pipereport','pipereport/*',
+            'pipereports', 'pipereports/*',
+            'setnewpassword','setnewpassword/*',
             'login','login/*',
             'logout','logout/*',
-            'consulttoken', 'consulttoken/*'
         ]);
 
         $middleware->use([\Illuminate\Http\Middleware\HandleCors::class]);
