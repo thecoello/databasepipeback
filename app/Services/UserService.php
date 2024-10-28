@@ -41,7 +41,7 @@ class UserService
 
             if($createUser){
                 Mail::send('usercreation', $data, function ($message) use ($request) {
-                    $message->from('manu@tasman.es');
+                    $message->from( env("MAIL_USERNAME"));
                     $message->subject('Your credentials - S/4HANA Report Analysis');
                     $message->to($request->email);
                 });
