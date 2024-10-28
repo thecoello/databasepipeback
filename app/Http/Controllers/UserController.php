@@ -43,9 +43,4 @@ class UserController extends Controller
         return $this->userService->deleteUser($id);
     }
 
-    public function consultToken(string $token){
-        return $this->userService->consultToken($token);
-    }
-
-
 }

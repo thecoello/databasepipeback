@@ -25,23 +25,23 @@ class UserRespository
     }
 
     public function setNewPassword(string $id, $request)
-    {
-        return User::find($id)->update($request);
+    {   
+        $update = User::where('id', '=', $id)->first();
+
+        if($update){
+            User::find($id)->update($request);
+            return $update->id;
+        }       
     }
 
     public function updateUser(string $id, Request $request)
     {
-        return User::find($id)->update($request->all())->id;
+        return User::find($id)->update($request->all());
     }
 
     public function deleteUser(string $id)
     {
         return User::find($id)->delete();
     }
-
-    public function consultToken(string $token){
-        return DB::table('passresettokens')->where('token','=',$token)->first();
-    }
-
  
 }

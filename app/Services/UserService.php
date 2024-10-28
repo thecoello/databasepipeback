@@ -69,6 +69,7 @@ class UserService
     {
         $findUser = $this->getUser($id)->toArray();
 
+
         $findUser['password'] = Str::password(12,true,true,false,false);
     
         $validator = Validator::make($findUser, ['password' => [
@@ -80,9 +81,10 @@ class UserService
 
             $updatePassword = $this->getUser($this->userRepository->setNewPassword($id,$findUser));
 
-            $data = ['password' => $findUser['password'], 'email' => $updatePassword->email];
+             if($updatePassword){
 
-            if($updatePassword){
+                $data = ['password' => $findUser['password'], 'email' => $updatePassword->email];
+
                 Mail::send('setnewpassword', $data, function ($message) use ($findUser) {
                     $message->from('manu@tasman.es');
                     $message->subject('Your password has been updated - S/4HANA Report Analysis');
@@ -90,7 +92,7 @@ class UserService
                 });
     
                 return $updatePassword;
-            } 
+            }  
 
             
         } else {
@@ -117,10 +119,6 @@ class UserService
         return $this->userRepository->deleteUser($id);
     }
 
-    public function consultToken(string $token)
-    {
-        return  $this->userRepository->consultToken($token);
-    }
-
+  
 
 }
